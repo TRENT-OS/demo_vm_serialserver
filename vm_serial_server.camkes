@@ -31,6 +31,8 @@ component VM {
 // Components
 import <VirtQueue/VirtQueue.camkes>;
 import <FileServer/FileServer.camkes>;
+import <TimeServer/TimeServer.camkes>;
+import <SerialServer/SerialServer.camkes>;
 
 
 // Platform specific configurations
@@ -79,40 +81,16 @@ assembly {
             from vm0.fs,
             to   fileServer.fs_ctrl
         );
-
-        //--------------------------------------------------------------
-        // VM1
-        //--------------------------------------------------------------
-        component VM vm1;
-        connection seL4VMDTBPassthrough vm0_dtb(
-            from vm1.dtb_self,
-            to   vm1.dtb
-        );
-        connection seL4GlobalAsynch vm0_notify_ready(
-            from vm1.notification_ready_connector,
-            to   vm1.notification_ready
-        );
-
-        connection seL4SerialServer serial_vm(
-            from vm1.batch,
-            to serial.processed_batch
-        );
-
-        connection seL4SerialServer serial_input(
-            from vm1.serial_getchar,
-            to serial.getchar
-        );
-
-        connection seL4RPCDataport vm0_fs(
-            from vm1.fs,
-            to   fileServer.fs_ctrl
-        );
-
     }
 
     configuration {
 
         fileServer.heap_size = 0x200000; // 128 KiB seems enough
+
+        time_server.timers_per_client = 1;
+        /* Put the entire time server at the highest priority */
+        time_server.priority = 255;
+        time_server.simple = true;
 
         // see also plat.camkes for more config values
         vm0.num_vcpus               = 1;
@@ -130,5 +108,7 @@ assembly {
         vm0.heap_size               = 0x300000;
         vm0.fs_shmem_size           = 0x100000;
 
+        vm0.serial_getchar_shmem_size = 0x1000;
+        vm0.batch_shmem_size = 0x1000;
     }
 }

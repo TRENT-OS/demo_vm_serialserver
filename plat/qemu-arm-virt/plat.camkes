@@ -22,16 +22,14 @@ assembly {
 
     configuration {
 
-        vm0.dtb = dtb([
-            {"path": "/pl011@9000000"},
-        ]);
-
-        vm0.mmios = [
-            "0x08040000:0x1000:12", // Interrupt Controller Virtual CPU interface (VM view)
-        ];
+        vm0.dtb = dtb([{}]);
 
         vm0.untyped_mmios = [
             "0x40000000:29", // Linux kernel memory regions
+        ];
+
+        vm0.mmios = [
+            "0x08040000:0x1000:12", // Interrupt Controller Virtual CPU interface (VM view)
         ];
 
         vm0.linux_address_config = {
@@ -45,30 +43,8 @@ assembly {
         };
 
         vm0.linux_image_config = {
-
-            "linux_bootcmdline": "debug ignore_loglevel",
-                // console=hvc0
-                // nosmp
-                // rw       (Mount root device read-write on boot)
-                // debug    (Enable kernel debugging, events log level)
-                // loglevel=8
-                //     0 (KERN_EMERG)          system is unusable
-                //     1 (KERN_ALERT)          action must be taken immediately
-                //     2 (KERN_CRIT)           critical conditions
-                //     3 (KERN_ERR)            error conditions
-                //     4 (KERN_WARNING)        warning conditions
-                //     5 (KERN_NOTICE)         normal but significant condition
-                //     6 (KERN_INFO)           informational
-                //     7 (KERN_DEBUG)          debug-level messages
-                // ignore_loglevel
-                // root=/dev/ram0
-                // pci=nomsi,realloc=off,bios
-                // initcall_blacklist=clk_disable_unused
-                // "",
-
-            "linux_stdout": "/pl011@9000000",
-                // hvc0
-                // /pl011@9000000
+            "linux_bootcmdline" : "console=hvc0 nosmp rw debug loglevel=8 pci=nomsi,realloc=off,bios initcall_blacklist=clk_disable_unused",
+            "linux_stdout" : "hvc0",
         };
     }
 }
